@@ -122,7 +122,7 @@ function to(user, data) {
  * Websocket Server on connection.
  */
 wss.on('connection', function(ws, request, client) {
-  console.log("client joined.");
+  console.log("Client joined.");
   const user_id = request.socket.remoteAddress;
   ws.id = user_id;
   sockets[ws.id] = ws;
@@ -143,7 +143,7 @@ wss.on('connection', function(ws, request, client) {
   });
 
   ws.on('message', function message (data) {
-    console.log("Received from %s with musical data: %s ", user, data);
+    console.log("Received from %s with musical data: %s ", user_id, data);
     
     // For AR-AI study.
     genai_ws.send(data);
