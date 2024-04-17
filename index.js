@@ -46,10 +46,12 @@ var exp_con;
 
 var genai_data;
 
+
+
 /**
  * Websocket Client that connects to charles genai_midi_module.
  */
-const genai_ws = new WebSocket('ws://192.168.0.81:5001');
+const genai_ws = new WebSocket('ws://localhost:5001');
 
 genai_ws.on('open', function open() {
   console.log("Connection o charles's genAI server is open.");
@@ -59,23 +61,33 @@ genai_ws.on('open', function open() {
 
 
 genai_ws.on('message', function message(data) {
-  console.log('Received from the AI agent: %s', data);
-  genai_data = data;
+  // console.log('Received from the AI agent: %s', data);
+  parse_data = data.replace("cc", "controlchange");
+  genai_data = parse_data;
   // Broadcast to hololens --- todo: does this work?
-  to(hl1, genai_data);
-  to(hl2, genai_data);
+
+    // testing AI to musician.
+    to(minilab1, genai_data);
+    to(hl1, genai_data);
+    to(hl2, genai_data);
+
 
 
 });
 
-genai_ws.on('error', console.error);
+genai_ws.on('error', function error(data) {
+  console.log("Websocket error:" + data.code);
+  genai_ws.close();
+  
+});
 genai_ws.on('close', function close(data) {
   console.log("The connection is closed.")
   console.log("Error information" + data);
   // setTimeout(() => {
-  //   connect();
-  // }, 1);
+  // }, 5000);
 });
+
+
 
 // sockets[genai_ws.id] = genai_ws; // add to the list of socket
 
@@ -142,12 +154,29 @@ wss.on('connection', function(ws, request, client) {
 
   });
 
+  const configured_channels = [71, 74, 76, 77, 93, 18, 19];
   ws.on('message', function message (data) {
     console.log("Received from %s with musical data: %s ", user_id, data);
     
-    // For AR-AI study.
-    genai_ws.send(data);
+    const msg_array = data.split("/");
+    //console.log(msg_array)
+    const msg_type = msg_array[3];
+    const channel_num = msg_array[4];
 
+    // Handling data send to AI agent.
+    if (msg_type == "cc" && configured_channels.includes(parseInt(channel_num))){
+    console.log("Sending to GenAI");
+    genai_ws.send(data);
+    }else if ((msg_type == "noteon" || msg_type == "noteoff") && (channel_num == 1)) {
+      genai_ws.send(data);
+    }    
+
+    // Handling data send to human musicians.  --- for group study
+    if (user_id == laptop1 ) {
+          to(hl4, data);
+    }else if (user_id == laptop2) {
+          to(hl3, data);
+    }
 
 
 
