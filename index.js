@@ -38,6 +38,9 @@ var hl2 = ethernet3;
 var hl3 = ethernet1;
 var hl4 = ethernet2;
 
+const configured_control_nums_ai = [74, 71, 76, 77, 93, 18, 19, 16];
+const const_control_num_range = [[0, 1], [0, 1], [0, 1], [0, 1], [0,100],[0,100], [ -70, 12], [-70, 12]];
+
 /**
  * Handy variables handling small things.
  */
@@ -54,7 +57,7 @@ var genai_data;
 const genai_ws = new WebSocket('ws://localhost:5001');
 
 genai_ws.on('open', function open() {
-  console.log("Connection o charles's genAI server is open.");
+  console.log("Connection to charles's genAI server is open.");
   // Useless prompt message.
   genai_ws.send('/channel/0/noteoff/0/0');
 });
@@ -63,13 +66,14 @@ genai_ws.on('open', function open() {
 genai_ws.on('message', function message(data) {
   // console.log('Received from the AI agent: %s', data);
   parse_data = data.replace("cc", "controlchange");
-  genai_data = parse_data;
+  // route_data = convertToInterface(parse_data);
+  // genai_data = parse_data;
   // Broadcast to hololens --- todo: does this work?
 
     // testing AI to musician.
-    to(minilab1, genai_data);
-    to(hl1, genai_data);
-    to(hl2, genai_data);
+    // to(minilab1, genai_data);
+    // to(hl3, genai_data);
+    // to(hl4, genai_data);
 
 
 
@@ -154,29 +158,37 @@ wss.on('connection', function(ws, request, client) {
 
   });
 
-  const configured_channels = [71, 74, 76, 77, 93, 18, 19];
+
   ws.on('message', function message (data) {
     console.log("Received from %s with musical data: %s ", user_id, data);
     
     const msg_array = data.split("/");
     //console.log(msg_array)
+    const channel_num = msg_array[2];
     const msg_type = msg_array[3];
-    const channel_num = msg_array[4];
+    const control_num = msg_array[4];
+    const control_num_int = parseInt(control_num);
+    
+    //console.log(msg_type)
 
     // Handling data send to AI agent.
-    if (msg_type == "cc" && configured_channels.includes(parseInt(channel_num))){
-    console.log("Sending to GenAI");
-    genai_ws.send(data);
+    if (msg_type == "cc" && configured_control_nums_ai.includes(control_num_int)){
+      console.log("Sending to GenAI");
+      genai_ws.send(data);
     }else if ((msg_type == "noteon" || msg_type == "noteoff") && (channel_num == 1)) {
       genai_ws.send(data);
     }    
 
+      parse_data = data.replace("cc", "controlchange");
+      //sroute_data = convertToInterface(parse_data);
+      to(hl4, parse_data);
+      to("::ffff:192.168.0.216", parse_data);
     // Handling data send to human musicians.  --- for group study
-    if (user_id == laptop1 ) {
-          to(hl4, data);
-    }else if (user_id == laptop2) {
-          to(hl3, data);
-    }
+    // if (user_id == laptop1 ) {
+    //       to(hl4, data);
+    // }else if (user_id == laptop2) {
+    //       to(hl3, data);
+    // }
 
 
 
@@ -233,3 +245,24 @@ server.listen(port, function() {
    console.log(`Listening on http://localhost:${port}`);
 });
 
+function convertToInterface(data) {
+  console.log(data);
+  route_data = data
+  const msg_array = data.split("/");
+  //console.log(msg_array)
+  const channel_num = msg_array[2];
+  const msg_type = msg_array[3];
+  const control_num = msg_array[4];
+  const control_num_int = parseInt(control_num);
+if (msg_type == "controlchange") {
+    //spliting the data and adapt to controlchange value on the interface
+    control_value_int = parseInt(msg_array[5]);
+    adapt_value_range = const_control_num_range[configured_control_nums_ai.indexOf(control_num_int)]
+    adapt_value =  control_value_int/127 * (adapt_value_range[1] - adapt_value_range[0]) + adapt_value_range[0];
+    route_data = "/channel/" + channel_num + "/" + msg_type + "/" + control_num + "/" + adapt_value.toFixed(2);
+  
+    console.log(route_data);
+}
+  return route_data;
+
+}
