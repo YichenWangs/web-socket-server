@@ -16,6 +16,7 @@ const app = express();
 const server = createServer(app);
 const wss = new WebSocket.Server({ server });
 const sockets = {};
+const sockets_port = {};
 
 /**
  * A bunch of ip addresses handling devices in Yichen's collaborative AR study.
@@ -29,7 +30,7 @@ const minilab2 = "::ffff:192.168.0.81";
 const ethernet1 = "::ffff:192.168.0.19";
 const ethernet2 = "::ffff:192.168.0.248";
 const ethernet3 = "::ffff:192.168.0.249";
-const charles_ai = "::ffff:192.168.0.81:5001";
+const local = "::1";
 
 var laptop1 = minilab1;
 var laptop2 = minilab2; 
@@ -76,20 +77,30 @@ inquirer.prompt(questions).then(answers => {
  */
 // thanks to https://stackoverflow.com/questions/51316727/how-do-i-send-a-message-to-a-specific-user-in-ws-library.
 function to(user, data) {
-    if(sockets[user] && sockets[user].readyState === WebSocket.OPEN)
-        sockets[user].send(data);
+  //console.log("local");
+  if (sockets[user] && sockets[user].readyState === WebSocket.OPEN) {
+    sockets[user].port = sockets_port[user];
+    sockets[user].send(data);
+  }
 }
 
 /**
  * Websocket Server on connection.
  */
-wss.on('connection', function(ws, request, client) {
+wss.on('connection', function (ws, request) {
   console.log("Client joined.");
-  const user_id = request.socket.remoteAddress;
+  const remote_address = request.socket.remoteAddress;
+  const remote_port = request.socket.remotePort;
+  const user_id = `${remote_address}`;
   ws.id = user_id;
   sockets[ws.id] = ws;
+  sockets_port[ws.id] = remote_port;
 
-  // console.log(sockets);
+
+  // const textInterval = setInterval(() => ws.send("/channel/1/noteon/71"), 210);
+  // const se = setInterval(() => ws.send("/channel/1/noteff/71"), 200);
+
+  // console.log(sockets_port);
 
   // //create new file
   // fs.open(filename, 'w', function (err, file) {
@@ -112,12 +123,17 @@ const notes_map =  [ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#",
     var note = msg[1];
 
     var idx = notes_map.indexOf(note);  
-    console.log(note);
+    // console.log(note);
     var midi = 60 + idx;
 
-    console.log(midi);
+    // console.log(midi);
+    var route_message = "/channel/1/" + msg[0] + "/" + midi;
+
+    //handling send to external synth
+    to(local, route_message);
 
   });
+    
 
   ws.on('close', function() {
     console.log("client left.");
