@@ -26,7 +26,8 @@ const HL21_ip = "::ffff:192.168.0.253";
 const HL35_ip = "::ffff:192.168.0.50";
 const HL36_ip = "::ffff:192.168.0.48";
 const minilab2 = "::ffff:192.168.0.132";
-const minilab1 = "::ffff:192.168.0.81";
+const minilab1 = "::ffff:192.168.0.103";
+// const minilab1 = "::ffff:192.168.0.81";
 const ethernet1 = "::ffff:192.168.0.19";
 const ethernet2 = "::ffff:192.168.0.248";
 const ethernet3 = "::ffff:192.168.0.249";
@@ -51,11 +52,11 @@ var filename;
 var exp_con;
 
 const questions = [
-  // {
-  //   type: 'input',
-  //   name: 'filename',
-  //   message: "What's the filename for log?",
-  // },
+  {
+    type: 'input',
+    name: 'filename',
+    message: "What's the filename for log?",
+  },
   {
     type: 'input',
     name: 'expcon',
@@ -103,11 +104,11 @@ wss.on('connection', function (ws, request, client) {
   // console.log(request.socket.remotePort);
   // console.log(request.socket.remoteFamily);
   console.log("current connection id is " + user_id);
-  // //create new file
-  // fs.open(filename, 'w', function (err, file) {
-  //   if (err) throw err;
-  //   console.log('File created!');
-  // }); 
+  //create new file
+  fs.open(filename, 'w', function (err, file) {
+    if (err) throw err;
+    console.log('File created!');
+  }); 
 
   ws.on('error', function error(err) {
     console.log(err.code);
@@ -129,6 +130,13 @@ wss.on('connection', function (ws, request, client) {
     var route_data_from_ai_to_human = data;
     var temp_tag_off = "";
 
+    if (fs == null) {
+      fs.open(filename, 'w', function (err, file) {
+        if (err) throw err;
+        console.log('Open File!');
+      }); 
+    }
+
     for (let i = 0; i < msg_array.length - 1; i++) {
       temp_tag_off += msg_array[i] + "/";
     }
@@ -138,7 +146,7 @@ wss.on('connection', function (ws, request, client) {
 
       // Handling data from AI agent sending to human musician Hololens.
       //console.log("AI - Human:" + route_data_from_ai_to_human);
-      to("::ffff:192.168.0.216", route_data_from_ai_to_human);
+      // to("::ffff:192.168.0.216", route_data_from_ai_to_human);
       to(hl3, route_data_from_ai_to_human);
       to(hl4, route_data_from_ai_to_human);
 
@@ -161,13 +169,13 @@ wss.on('connection', function (ws, request, client) {
         to(charles_ai, route_data_from_human_to_ai);
       }
       //console.log("Human - Human" + route_data_from_human_to_human);
-      to("::ffff:192.168.0.216", route_data_from_human_to_human);
+      // to("::ffff:192.168.0.216", route_data_from_human_to_human);
       if (exp_con = "group") {
         // send to each other
         if (user_id == laptop1) {
-          to(hl3, route_data_from_human_to_human);
-        } else if (user_id == laptop2) {
           to(hl4, route_data_from_human_to_human);
+        } else if (user_id == laptop2) {
+          to(hl3, route_data_from_human_to_human);
         }
       }
     }
@@ -181,6 +189,14 @@ wss.on('connection', function (ws, request, client) {
     // to(hl4, parse_data);
     // testing sending human musician information
 
+    let timeStamp = new Date();
+    content = `Message ${data} at @ ${timeStamp}`;
+        fs.appendFile(filename.toString(), `${content}\n`, err => {
+          if (err) {
+            console.error(err);
+          }
+
+      });
 
   });
 
