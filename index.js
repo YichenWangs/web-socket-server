@@ -117,7 +117,7 @@ wss.on('connection', function (ws, request, client) {
   });
 
   ws.on('message', function message(data) {
-    //console.log("Received from %s with musical data: %s ", user_id, data);
+    console.log("Received from %s with musical data: %s ", user_id, data);
     const msg_array = data.split("/");
     const tag = msg_array[msg_array.length - 1];
     const channel_num = msg_array[2];
