@@ -143,7 +143,7 @@ wss.on('connection', function(ws, request, client) {
   });
 
   ws.on('message', function message (data) {
-    console.log("Received from %s with musical data: %s ", user_id, data);
+    // console.log("Received from %s with musical data: %s ", user_id, data);
     
     // // For AR-AI study.
     // genai_ws.send(data);
