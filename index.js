@@ -49,7 +49,7 @@ var genai_data;
 /**
  * Websocket Client that connects to charles genai_midi_module.
  */
-const genai_ws = new WebSocket('ws://192.168.0.81:5001');
+const genai_ws = new WebSocket('ws://192.168.0.41:5001');
 
 genai_ws.on('open', function open() {
   console.log("Connection o charles's genAI server is open.");
@@ -68,14 +68,14 @@ genai_ws.on('message', function message(data) {
 
 });
 
-genai_ws.on('error', console.error);
-genai_ws.on('close', function close(data) {
-  console.log("The connection is closed.")
-  console.log("Error information" + data);
-  // setTimeout(() => {
-  //   connect();
-  // }, 1);
-});
+// genai_ws.on('error', console.error);
+// genai_ws.on('close', function close(data) {
+//   console.log("The connection is closed.")
+//   console.log("Error information" + data);
+//   // setTimeout(() => {
+//   //   connect();
+//   // }, 1);
+// });
 
 // sockets[genai_ws.id] = genai_ws; // add to the list of socket
 
@@ -153,7 +153,6 @@ wss.on('connection', function(ws, request, client) {
       }else if (user_id == hl3) {
         to(hl4, data)
       }
-
 
 
 
