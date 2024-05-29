@@ -46,42 +46,42 @@ var exp_con;
 
 var genai_data;
 
-/**
- * Websocket Client that connects to charles genai_midi_module.
- */
-const genai_ws = new WebSocket('ws://192.168.0.41:5001');
+// /**
+//  * Websocket Client that connects to charles genai_midi_module.
+//  */
+// const genai_ws = new WebSocket('ws://192.168.0.41:5001');
 
-genai_ws.on('open', function open() {
-  console.log("Connection o charles's genAI server is open.");
-  // Useless prompt message.
-  genai_ws.send('/channel/0/noteoff/0/0');
-});
-
-
-genai_ws.on('message', function message(data) {
-  console.log('Received from the AI agent: %s', data);
-  genai_data = data;
-  // Broadcast to hololens --- todo: does this work?
-  to(hl1, genai_data);
-  to(hl2, genai_data);
-
-
-});
-
-// genai_ws.on('error', console.error);
-// genai_ws.on('close', function close(data) {
-//   console.log("The connection is closed.")
-//   console.log("Error information" + data);
-//   // setTimeout(() => {
-//   //   connect();
-//   // }, 1);
+// genai_ws.on('open', function open() {
+//   console.log("Connection o charles's genAI server is open.");
+//   // Useless prompt message.
+//   genai_ws.send('/channel/0/noteoff/0/0');
 // });
 
-// sockets[genai_ws.id] = genai_ws; // add to the list of socket
 
-// genai_ws.on('message', route_message); // could do it this way so that
+// genai_ws.on('message', function message(data) {
+//   console.log('Received from the AI agent: %s', data);
+//   genai_data = data;
+//   // Broadcast to hololens --- todo: does this work?
+//   to(hl1, genai_data);
+//   to(hl2, genai_data);
 
-// }
+
+// });
+
+// // genai_ws.on('error', console.error);
+// // genai_ws.on('close', function close(data) {
+// //   console.log("The connection is closed.")
+// //   console.log("Error information" + data);
+// //   // setTimeout(() => {
+// //   //   connect();
+// //   // }, 1);
+// // });
+
+// // sockets[genai_ws.id] = genai_ws; // add to the list of socket
+
+// // genai_ws.on('message', route_message); // could do it this way so that
+
+// // }
 
 
 const questions = [
