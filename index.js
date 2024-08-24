@@ -30,8 +30,11 @@ const minilab1 = "::ffff:192.168.0.103";
 // const minilab1 = "::ffff:192.168.0.81";
 const ethernet1 = "::ffff:192.168.0.19";
 const ethernet2 = "::ffff:192.168.0.248";
+// const ethernet2 = "::ffff:192.168.0.102";
+
 const ethernet3 = "::ffff:192.168.0.249";
 const charles_ai = "::ffff:127.0.0.1";
+
 
 var laptop1 = minilab1;
 var laptop2 = minilab2;
@@ -64,14 +67,14 @@ const questions = [
   },
 ];
 
-inquirer.prompt(questions).then(answers => {
-  filename = answers.filename;
-  console.log(answers.filename);
-  exp_con = answers.expcon;
-  console.log(answers.expcon);
+// inquirer.prompt(questions).then(answers => {
+//   filename = answers.filename;
+//   console.log(answers.filename);
+//   exp_con = answers.expcon;
+//   console.log(answers.expcon);
 
 
-});
+// });
 
 
 /**
@@ -105,10 +108,10 @@ wss.on('connection', function (ws, request, client) {
   // console.log(request.socket.remoteFamily);
   console.log("current connection id is " + user_id);
   //create new file
-  fs.open(filename, 'w', function (err, file) {
-    if (err) throw err;
-    console.log('File created!');
-  }); 
+  // fs.open(filename, 'w', function (err, file) {
+  //   if (err) throw err;
+  //   console.log('File created!');
+  // }); 
 
   ws.on('error', function error(err) {
     console.log(err.code);
@@ -118,9 +121,11 @@ wss.on('connection', function (ws, request, client) {
 
   ws.on('message', function message(data) {
     console.log("Received from %s with musical data: %s ", user_id, data);
-    const msg_array = data.split("/");
+    var msg_array = data.split("/");
     const tag = msg_array[msg_array.length - 1];
     const channel_num = msg_array[2];
+    //temp fix for charles ... ---- off setting midi channel...
+    msg_array[2] = msg_array[2] - 1 + 2;
     const msg_type = msg_array[3];
     const control_num = msg_array[4];
     const control_num_int = parseInt(control_num);
@@ -129,17 +134,20 @@ wss.on('connection', function (ws, request, client) {
     var route_data_from_human_to_human = data;
     var route_data_from_ai_to_human = data;
     var temp_tag_off = "";
-
-    if (fs == null) {
-      fs.open(filename, 'w', function (err, file) {
-        if (err) throw err;
-        console.log('Open File!');
-      }); 
-    }
+    // if (fs == null) {
+    //   fs.open(filename, 'w', function (err, file) {
+    //     if (err) throw err;
+    //     console.log('Open File!');
+    //   }); 
+    // }
 
     for (let i = 0; i < msg_array.length - 1; i++) {
       temp_tag_off += msg_array[i] + "/";
     }
+    //some modification made for temp fix ...TODO 
+    var route_data_from_ai_to_human = temp_tag_off + "ai";
+    console.log("Sending to headset",  route_data_from_ai_to_human)
+    // console.log("Updated to fix Charles's bug", temp_tag_off);
 
     // message comes from ai
     if (tag == "ai") {
@@ -149,6 +157,7 @@ wss.on('connection', function (ws, request, client) {
       // to("::ffff:192.168.0.216", route_data_from_ai_to_human);
       to(hl3, route_data_from_ai_to_human);
       to(hl4, route_data_from_ai_to_human);
+      to("::ffff:192.168.0.100", route_data_from_ai_to_human);
 
 
       // message comes from human 
@@ -189,14 +198,14 @@ wss.on('connection', function (ws, request, client) {
     // to(hl4, parse_data);
     // testing sending human musician information
 
-    let timeStamp = new Date();
-    content = `Message ${data} at @ ${timeStamp}`;
-        fs.appendFile(filename.toString(), `${content}\n`, err => {
-          if (err) {
-            console.error(err);
-          }
+    // let timeStamp = new Date();
+    // content = `Message ${data} at @ ${timeStamp}`;
+    //     fs.appendFile(filename.toString(), `${content}\n`, err => {
+    //       if (err) {
+    //         console.error(err);
+    //       }
 
-      });
+    //   });
 
   });
 
