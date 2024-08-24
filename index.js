@@ -125,7 +125,7 @@ wss.on('connection', function (ws, request, client) {
     const tag = msg_array[msg_array.length - 1];
     const channel_num = msg_array[2];
     //temp fix for charles ... ---- off setting midi channel...
-    msg_array[2] = msg_array[2] - 1 + 2;
+    // msg_array[2] = msg_array[2] - 1 + 2;
     const msg_type = msg_array[3];
     const control_num = msg_array[4];
     const control_num_int = parseInt(control_num);
@@ -146,7 +146,7 @@ wss.on('connection', function (ws, request, client) {
     }
     //some modification made for temp fix ...TODO 
     var route_data_from_ai_to_human = temp_tag_off + "ai";
-    console.log("Sending to headset",  route_data_from_ai_to_human)
+    // console.log("Sending to headset",  route_data_from_ai_to_human);
     // console.log("Updated to fix Charles's bug", temp_tag_off);
 
     // message comes from ai
