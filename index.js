@@ -27,7 +27,8 @@ const HL36_ip = "::ffff:192.168.0.48";
 const minilab1 = "::ffff:192.168.0.132";
 const minilab2 = "::ffff:192.168.0.81";
 const ethernet1 = "::ffff:192.168.0.19";
-const ethernet2 = "::ffff:192.168.0.248";
+const ethernet2 = "::ffff:192.168.0.101";
+// const ethernet2 = "::ffff:192.168.0.248";
 const ethernet3 = "::ffff:192.168.0.249";
 const charles_ai = "::ffff:192.168.0.81:5001";
 
@@ -143,15 +144,20 @@ wss.on('connection', function(ws, request, client) {
   });
 
   ws.on('message', function message (data) {
-    // console.log("Received from %s with musical data: %s ", user_id, data);
+    console.log("Received from %s with musical data: %s ", user_id, data);
     
     // // For AR-AI study.
     // genai_ws.send(data);
+      //to("::ffff:192.168.0.100", data);
 
       if (user_id == hl4) {
-        to(hl3, data)
+        to(hl3, data);
+        
       }else if (user_id == hl3) {
-        to(hl4, data)
+        to(hl4, data);
+      }else if (user_id == "::ffff:192.168.0.100") {
+        to(hl3, data);
+        to(hl4, data);
       }
 
 
