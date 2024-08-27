@@ -120,12 +120,12 @@ wss.on('connection', function (ws, request, client) {
   });
 
   ws.on('message', function message(data) {
-    console.log("Received from %s with musical data: %s ", user_id, data);
+    //console.log("Received from %s with musical data: %s ", user_id, data);
     var msg_array = data.split("/");
     const tag = msg_array[msg_array.length - 1];
     const channel_num = msg_array[2];
     //temp fix for charles ... ---- off setting midi channel...
-    // msg_array[2] = msg_array[2] - 1 + 2;
+    msg_array[2] = msg_array[2] - 1 + 2;
     const msg_type = msg_array[3];
     const control_num = msg_array[4];
     const control_num_int = parseInt(control_num);
@@ -153,8 +153,9 @@ wss.on('connection', function (ws, request, client) {
     if (tag == "ai") {
 
       // Handling data from AI agent sending to human musician Hololens.
-      //console.log("AI - Human:" + route_data_from_ai_to_human);
+      console.log("AI - Human:" + route_data_from_ai_to_human);
       // to("::ffff:192.168.0.216", route_data_from_ai_to_human);
+      
       to(hl3, route_data_from_ai_to_human);
       to(hl4, route_data_from_ai_to_human);
       to("::ffff:192.168.0.100", route_data_from_ai_to_human);
